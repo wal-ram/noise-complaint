@@ -1,0 +1,278 @@
+[
+  {
+    "date": "2026-03-18",
+    "time": "00:14",
+    "description": "Signal Called and asked neighbor to turn down",
+    "type": "complaint",
+    "is_manual": true
+  },
+  {
+    "date": "2026-04-20",
+    "time": "22:00",
+    "description": "Signal Called and asked neighbor to turn down",
+    "type": "complaint",
+    "is_manual": true
+  },
+  {
+    "date": "2026-05-08",
+    "time": "17:21",
+    "file": "2026-05-08_05-21-14-PM",
+    "bass_events": 1,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-05-08",
+    "time": "17:40",
+    "file": "2026-05-08_05-40-37-PM",
+    "bass_events": 1,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-05-13",
+    "time": "19:57",
+    "file": "2026-05-13_07-57-31-PM",
+    "bass_events": 1,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-05-13",
+    "time": "19:58",
+    "file": "2026-05-13_07-58-53-PM",
+    "bass_events": 1,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-05-13",
+    "time": "19:59",
+    "file": "2026-05-13_07-59-41-PM",
+    "bass_events": 1,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-05-19",
+    "time": "16:08",
+    "file": "2026-05-19_04-08-58-PM",
+    "bass_events": 1,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-05-19",
+    "time": "16:09",
+    "file": "2026-05-19_04-09-21-PM",
+    "bass_events": 3,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-07-04",
+    "time": "15:03",
+    "file": "2026-07-04_03-03-52-PM",
+    "bass_events": 3,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-07-04",
+    "time": "15:05",
+    "file": "2026-07-04_03-05-51-PM",
+    "bass_events": 1,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-07-05",
+    "time": "20:58",
+    "file": "2026-07-05_08-58-00-PM",
+    "bass_events": 1,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-07-07",
+    "time": "18:18",
+    "file": "2026-07-07_06-18-46-PM",
+    "bass_events": 6,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-07-07",
+    "time": "18:18",
+    "file": "2026-07-07_06-18-46-PM_1",
+    "bass_events": 6,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-07-07",
+    "time": "18:19",
+    "file": "2026-07-07_06-19-17-PM",
+    "bass_events": 4,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-07-07",
+    "time": "18:20",
+    "file": "2026-07-07_06-20-02-PM",
+    "bass_events": 1,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-07-07",
+    "time": "18:21",
+    "file": "2026-07-07_06-21-57-PM",
+    "bass_events": 9,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-07-09",
+    "time": "18:08",
+    "file": "2026-07-09_06-08-02-PM",
+    "bass_events": 1,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-07-09",
+    "time": "18:08",
+    "file": "2026-07-09_06-08-17-PM",
+    "bass_events": 3,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-07-09",
+    "time": "18:24",
+    "file": "2026-07-09_06-24-00-PM",
+    "bass_events": 3,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-07-09",
+    "time": "18:24",
+    "file": "2026-07-09_06-24-19-PM",
+    "bass_events": 4,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-07-09",
+    "time": "18:25",
+    "file": "2026-07-09_06-25-17-PM",
+    "bass_events": 5,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-07-09",
+    "time": "18:25",
+    "file": "2026-07-09_06-25-46-PM",
+    "bass_events": 2,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-07-14",
+    "time": "02:57",
+    "file": "2026-07-14_02-57-56-AM",
+    "bass_events": 1,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-07-14",
+    "time": "02:58",
+    "file": "2026-07-14_02-58-38-AM",
+    "bass_events": 1,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-07-14",
+    "time": "02:58",
+    "file": "2026-07-14_02-58-38-AM_1",
+    "bass_events": 1,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-07-15",
+    "time": "01:59",
+    "file": "2026-07-15_01-59-43-AM",
+    "bass_events": 2,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-07-15",
+    "time": "01:59",
+    "file": "2026-07-15_01-59-57-AM",
+    "bass_events": 1,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-07-15",
+    "time": "02:00",
+    "file": "2026-07-15_02-00-03-AM",
+    "bass_events": 7,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-07-17",
+    "time": "01:01",
+    "file": "2026-07-17_01-01-52-AM",
+    "bass_events": 1,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-07-28",
+    "time": "13:58",
+    "file": "2026-07-28_01-58-03-PM",
+    "bass_events": 3,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-07-28",
+    "time": "16:00",
+    "description": "Regan from Leasing Office walked the hall to confirm",
+    "type": "verification",
+    "is_manual": true
+  },
+  {
+    "date": "2026-07-29",
+    "time": "01:37",
+    "file": "2026-07-29_01-37-09-AM",
+    "bass_events": 3,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-07-30",
+    "time": "02:49",
+    "file": "2026-07-30_02-49-47-AM",
+    "bass_events": 1,
+    "type": "recording",
+    "is_manual": false
+  },
+  {
+    "date": "2026-07-30",
+    "time": "03:00",
+    "description": "Signal Called to turn down",
+    "type": "complaint",
+    "is_manual": true
+  }
+]

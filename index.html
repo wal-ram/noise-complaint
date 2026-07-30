@@ -1,0 +1,1323 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apartment Noise Complaint - Evidence</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.3;
+            background: #f5f5f5;
+            padding: 8px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 12px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 1.4em;
+            margin-bottom: 3px;
+        }
+        
+        .header p {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .timeline-section {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .timeline-section h2 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 1.2em;
+        }
+        
+        .timeline-chart {
+            height: 360px;
+            margin-bottom: 15px;
+        }
+        
+        .timeline-manual-notes {
+            margin-top: 12px;
+            padding: 12px 14px;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.85em;
+            color: #444;
+        }
+        
+        .timeline-manual-notes h4 {
+            margin: 0 0 8px;
+            color: #2c3e50;
+            font-size: 0.95em;
+        }
+        
+        .timeline-manual-notes ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .timeline-manual-notes li {
+            margin-bottom: 6px;
+        }
+        
+        .timeline-manual-notes li:last-child {
+            margin-bottom: 0;
+        }
+        
+        .timeline-manual-notes .note-date {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .timeline-legend {
+            display: flex;
+            gap: 20px;
+            font-size: 0.85em;
+            color: #666;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+        
+        
+        
+        .birdseye-toggle {
+            position: fixed;
+            top: 10px;
+            right: 120px;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+        
+        .birdseye-panel {
+            display: none;
+            position: fixed;
+            top: 50px;
+            right: 120px;
+            width: 400px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 15px;
+            z-index: 998;
+        }
+        
+        .birdseye-panel.active {
+            display: block;
+        }
+        
+        .birdseye-diagram {
+            width: 100%;
+            height: 300px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            position: relative;
+        }
+        
+        .birdseye-svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .video-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            margin: 6px;
+            padding: 8px;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        
+        .card-header h3 {
+            color: #333;
+            font-size: 1em;
+            margin: 0;
+            flex-grow: 1;
+        }
+        
+        .media-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .media-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .audio-section {
+            padding: 6px;
+            border-radius: 4px;
+        }
+        
+        .analysis-section {
+            padding: 6px;
+            border-radius: 4px;
+        }
+        
+        audio {
+            width: 100%;
+            height: 25px;
+        }
+        
+        .analysis-image {
+            max-width: 100%;
+            height: 120px;
+            width: auto;
+            border-radius: 3px;
+            border: 1px solid #ddd;
+            cursor: crosshair;
+            transition: transform 0.1s ease;
+            object-fit: contain;
+        }
+        
+        .analysis-image:hover {
+            transform: scale(1.01);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        
+        .clickable-graph {
+            position: relative;
+        }
+        
+        .clickable-graph::after {
+            content: 'Click to jump';
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background: rgba(44, 62, 80, 0.8);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 2px;
+            font-size: 0.65em;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <button class="birdseye-toggle" onclick="toggleBirdseyePanel()">Floor Plan</button>
+        
+        
+        <div class="birdseye-panel" id="birdseyePanel">
+            <h3>Floor Plan</h3>
+            <div class="birdseye-diagram">
+                <svg class="birdseye-svg" viewBox="0 0 400 300">
+                    <!-- My apartment (left side) -->
+                    <rect x="10" y="50" width="180" height="200" fill="#e8f4f8" stroke="#2c3e50" stroke-width="2"/>
+                    <text x="100" y="40" text-anchor="middle" font-size="12" fill="#2c3e50">My Apartment</text>
+                    
+                    <!-- My bedroom (only room on shared wall side) -->
+                    <rect x="20" y="60" width="160" height="180" fill="#d4e6f1" stroke="#2c3e50" stroke-width="1"/>
+                    <text x="100" y="80" text-anchor="middle" font-size="10" fill="#2c3e50">Bedroom</text>
+                    
+                    <!-- Bed: short end (headboard) flush against shared wall -->
+                    <rect x="160" y="110" width="40" height="70" fill="#8b4513" stroke="#5d3a1a" stroke-width="1"/>
+                    <rect x="198" y="110" width="2" height="70" fill="#5d3a1a"/>
+                    <text x="180" y="195" text-anchor="middle" font-size="7" fill="#5d3a1a">Bed</text>
+                    
+                    <!-- Head/pillow at short end against shared wall -->
+                    <ellipse cx="195" cy="145" rx="5" ry="8" fill="#fff" stroke="#ddd" stroke-width="1"/>
+                    <text x="175" y="148" text-anchor="end" font-size="6" fill="#333">Head</text>
+                    
+                    <!-- Neighbor's apartment (right side) -->
+                    <rect x="210" y="50" width="180" height="200" fill="#f8e8e8" stroke="#2c3e50" stroke-width="2"/>
+                    <text x="300" y="40" text-anchor="middle" font-size="12" fill="#2c3e50">Neighbor's Apartment</text>
+                    
+                    <!-- Neighbor's living room directly adjacent (no bedroom in between) -->
+                    <rect x="220" y="60" width="160" height="180" fill="#f0e8d4" stroke="#2c3e50" stroke-width="1"/>
+                    <text x="300" y="80" text-anchor="middle" font-size="10" fill="#2c3e50">Living Room</text>
+                    <text x="300" y="95" text-anchor="middle" font-size="8" fill="#666">(directly adjacent)</text>
+                    
+                    <!-- TV/Soundbar on far wall, facing my bedroom through shared wall -->
+                    <rect x="360" y="120" width="12" height="50" fill="#333" stroke="#000" stroke-width="1"/>
+                    <text x="366" y="185" text-anchor="middle" font-size="7" fill="#fff">TV</text>
+                    <rect x="360" y="175" width="12" height="5" fill="#555" stroke="#000" stroke-width="1"/>
+                    <text x="366" y="195" text-anchor="middle" font-size="6" fill="#555">Soundbar</text>
+                    
+                    <!-- Sound direction arrow -->
+                    <line x1="360" y1="145" x2="210" y2="145" stroke="#dc3545" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    
+                    <!-- Arrow marker definition -->
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#dc3545"/>
+                        </marker>
+                    </defs>
+                    
+                    <!-- Wall between apartments -->
+                    <line x1="200" y1="50" x2="200" y2="250" stroke="#2c3e50" stroke-width="4"/>
+                    <text x="200" y="265" text-anchor="middle" font-size="9" fill="#2c3e50">Shared Wall</text>
+                </svg>
+            </div>
+            <p style="font-size: 0.8em; color: #666; margin-top: 10px;">
+                My bed headboard (short end) is against the shared wall. Neighbor's living room is directly on the other side — no bedroom in between. Their TV/soundbar faces toward my bedroom.
+            </p>
+            <button class="btn btn-danger" onclick="closeBirdseyePanel()" style="margin-top: 10px;">Close</button>
+        </div>
+        
+        <div class="header">
+            <h1>Apartment Noise Complaint Evidence</h1>
+            <p>Bass frequency analysis (May-July 2026)</p>
+        </div>
+        
+        <div class="timeline-section">
+            <h2>Incident Timeline</h2>
+            <div class="timeline-chart" id="timelineChart">
+                <!-- Timeline will be rendered here -->
+            </div>
+            <div class="timeline-legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #e67e22;"></div>
+                    <span>Verified Events</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #007bff;"></div>
+                    <span>Recordings</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: repeating-linear-gradient(135deg, #c7d2fe 0, #c7d2fe 2px, #eef2ff 2px, #eef2ff 6px); border: 1px solid #818cf8;"></div>
+                    <span>Quiet Hours (10PM-7AM)</span>
+                </div>
+            </div>
+            <div class="timeline-manual-notes" id="timelineManualNotes"></div>
+        </div>
+        
+        
+        <div class="video-card" data-file-base="2026-07-30_02-49-47-AM">
+            <div class="card-header">
+                <h3>July 30, 2026 at 02:49 AM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-07-30_02-49-47-AM" controls>
+                        <source src="audio/2026-07-30_02-49-47-AM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-07-30_02-49-47-AM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-07-30_02-49-47-AM"
+                         data-duration="11.52">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-07-29_12-39-12-AM">
+            <div class="card-header">
+                <h3>2026-07-29_12-39-12-AM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-07-29_12-39-12-AM" controls>
+                        <source src="audio/2026-07-29_12-39-12-AM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-07-29_12-39-12-AM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-07-29_12-39-12-AM"
+                         data-duration="14.78">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-07-29_01-37-09-AM">
+            <div class="card-header">
+                <h3>July 29, 2026 at 01:37 AM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-07-29_01-37-09-AM" controls>
+                        <source src="audio/2026-07-29_01-37-09-AM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-07-29_01-37-09-AM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-07-29_01-37-09-AM"
+                         data-duration="11.58">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-07-28_01-58-03-PM">
+            <div class="card-header">
+                <h3>July 28, 2026 at 01:58 PM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-07-28_01-58-03-PM" controls>
+                        <source src="audio/2026-07-28_01-58-03-PM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-07-28_01-58-03-PM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-07-28_01-58-03-PM"
+                         data-duration="2.99">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-07-17_01-01-52-AM">
+            <div class="card-header">
+                <h3>July 17, 2026 at 01:01 AM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-07-17_01-01-52-AM" controls>
+                        <source src="audio/2026-07-17_01-01-52-AM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-07-17_01-01-52-AM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-07-17_01-01-52-AM"
+                         data-duration="13.45">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-07-15_02-00-03-AM">
+            <div class="card-header">
+                <h3>July 15, 2026 at 02:00 AM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-07-15_02-00-03-AM" controls>
+                        <source src="audio/2026-07-15_02-00-03-AM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-07-15_02-00-03-AM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-07-15_02-00-03-AM"
+                         data-duration="23.02">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-07-15_01-59-57-AM">
+            <div class="card-header">
+                <h3>July 15, 2026 at 01:59 AM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-07-15_01-59-57-AM" controls>
+                        <source src="audio/2026-07-15_01-59-57-AM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-07-15_01-59-57-AM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-07-15_01-59-57-AM"
+                         data-duration="2.79">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-07-15_01-59-43-AM">
+            <div class="card-header">
+                <h3>July 15, 2026 at 01:59 AM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-07-15_01-59-43-AM" controls>
+                        <source src="audio/2026-07-15_01-59-43-AM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-07-15_01-59-43-AM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-07-15_01-59-43-AM"
+                         data-duration="7.29">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-07-14_02-58-38-AM_1">
+            <div class="card-header">
+                <h3>July 14, 2026 at 02:58 AM (2nd recording)</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-07-14_02-58-38-AM_1" controls>
+                        <source src="audio/2026-07-14_02-58-38-AM_1.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-07-14_02-58-38-AM_1_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-07-14_02-58-38-AM_1"
+                         data-duration="8.16">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-07-14_02-58-38-AM">
+            <div class="card-header">
+                <h3>July 14, 2026 at 02:58 AM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-07-14_02-58-38-AM" controls>
+                        <source src="audio/2026-07-14_02-58-38-AM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-07-14_02-58-38-AM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-07-14_02-58-38-AM"
+                         data-duration="31.68">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-07-14_02-57-56-AM">
+            <div class="card-header">
+                <h3>July 14, 2026 at 02:57 AM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-07-14_02-57-56-AM" controls>
+                        <source src="audio/2026-07-14_02-57-56-AM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-07-14_02-57-56-AM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-07-14_02-57-56-AM"
+                         data-duration="16.85">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-07-09_06-25-46-PM">
+            <div class="card-header">
+                <h3>July 09, 2026 at 06:25 PM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-07-09_06-25-46-PM" controls>
+                        <source src="audio/2026-07-09_06-25-46-PM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-07-09_06-25-46-PM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-07-09_06-25-46-PM"
+                         data-duration="7.89">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-07-09_06-25-17-PM">
+            <div class="card-header">
+                <h3>July 09, 2026 at 06:25 PM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-07-09_06-25-17-PM" controls>
+                        <source src="audio/2026-07-09_06-25-17-PM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-07-09_06-25-17-PM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-07-09_06-25-17-PM"
+                         data-duration="19.05">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-07-09_06-24-19-PM">
+            <div class="card-header">
+                <h3>July 09, 2026 at 06:24 PM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-07-09_06-24-19-PM" controls>
+                        <source src="audio/2026-07-09_06-24-19-PM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-07-09_06-24-19-PM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-07-09_06-24-19-PM"
+                         data-duration="13.50">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-07-09_06-24-00-PM">
+            <div class="card-header">
+                <h3>July 09, 2026 at 06:24 PM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-07-09_06-24-00-PM" controls>
+                        <source src="audio/2026-07-09_06-24-00-PM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-07-09_06-24-00-PM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-07-09_06-24-00-PM"
+                         data-duration="12.67">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-07-09_06-08-17-PM">
+            <div class="card-header">
+                <h3>July 09, 2026 at 06:08 PM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-07-09_06-08-17-PM" controls>
+                        <source src="audio/2026-07-09_06-08-17-PM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-07-09_06-08-17-PM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-07-09_06-08-17-PM"
+                         data-duration="32.81">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-07-09_06-08-02-PM">
+            <div class="card-header">
+                <h3>July 09, 2026 at 06:08 PM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-07-09_06-08-02-PM" controls>
+                        <source src="audio/2026-07-09_06-08-02-PM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-07-09_06-08-02-PM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-07-09_06-08-02-PM"
+                         data-duration="0.21">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-07-07_06-21-57-PM">
+            <div class="card-header">
+                <h3>July 07, 2026 at 06:21 PM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-07-07_06-21-57-PM" controls>
+                        <source src="audio/2026-07-07_06-21-57-PM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-07-07_06-21-57-PM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-07-07_06-21-57-PM"
+                         data-duration="28.35">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-07-07_06-20-02-PM">
+            <div class="card-header">
+                <h3>July 07, 2026 at 06:20 PM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-07-07_06-20-02-PM" controls>
+                        <source src="audio/2026-07-07_06-20-02-PM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-07-07_06-20-02-PM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-07-07_06-20-02-PM"
+                         data-duration="50.47">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-07-07_06-19-17-PM">
+            <div class="card-header">
+                <h3>July 07, 2026 at 06:19 PM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-07-07_06-19-17-PM" controls>
+                        <source src="audio/2026-07-07_06-19-17-PM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-07-07_06-19-17-PM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-07-07_06-19-17-PM"
+                         data-duration="11.18">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-07-07_06-18-46-PM_1">
+            <div class="card-header">
+                <h3>July 07, 2026 at 06:18 PM (2nd recording)</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-07-07_06-18-46-PM_1" controls>
+                        <source src="audio/2026-07-07_06-18-46-PM_1.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-07-07_06-18-46-PM_1_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-07-07_06-18-46-PM_1"
+                         data-duration="11.01">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-07-07_06-18-46-PM">
+            <div class="card-header">
+                <h3>July 07, 2026 at 06:18 PM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-07-07_06-18-46-PM" controls>
+                        <source src="audio/2026-07-07_06-18-46-PM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-07-07_06-18-46-PM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-07-07_06-18-46-PM"
+                         data-duration="11.01">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-07-05_08-58-00-PM">
+            <div class="card-header">
+                <h3>July 05, 2026 at 08:58 PM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-07-05_08-58-00-PM" controls>
+                        <source src="audio/2026-07-05_08-58-00-PM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-07-05_08-58-00-PM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-07-05_08-58-00-PM"
+                         data-duration="14.57">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-07-04_03-05-51-PM">
+            <div class="card-header">
+                <h3>July 04, 2026 at 03:05 PM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-07-04_03-05-51-PM" controls>
+                        <source src="audio/2026-07-04_03-05-51-PM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-07-04_03-05-51-PM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-07-04_03-05-51-PM"
+                         data-duration="15.68">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-07-04_03-03-52-PM">
+            <div class="card-header">
+                <h3>July 04, 2026 at 03:03 PM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-07-04_03-03-52-PM" controls>
+                        <source src="audio/2026-07-04_03-03-52-PM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-07-04_03-03-52-PM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-07-04_03-03-52-PM"
+                         data-duration="21.42">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-05-19_04-09-21-PM">
+            <div class="card-header">
+                <h3>May 19, 2026 at 04:09 PM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-05-19_04-09-21-PM" controls>
+                        <source src="audio/2026-05-19_04-09-21-PM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-05-19_04-09-21-PM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-05-19_04-09-21-PM"
+                         data-duration="14.89">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-05-19_04-08-58-PM">
+            <div class="card-header">
+                <h3>May 19, 2026 at 04:08 PM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-05-19_04-08-58-PM" controls>
+                        <source src="audio/2026-05-19_04-08-58-PM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-05-19_04-08-58-PM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-05-19_04-08-58-PM"
+                         data-duration="6.68">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-05-13_07-59-41-PM">
+            <div class="card-header">
+                <h3>May 13, 2026 at 07:59 PM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-05-13_07-59-41-PM" controls>
+                        <source src="audio/2026-05-13_07-59-41-PM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-05-13_07-59-41-PM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-05-13_07-59-41-PM"
+                         data-duration="13.55">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-05-13_07-58-53-PM">
+            <div class="card-header">
+                <h3>May 13, 2026 at 07:58 PM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-05-13_07-58-53-PM" controls>
+                        <source src="audio/2026-05-13_07-58-53-PM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-05-13_07-58-53-PM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-05-13_07-58-53-PM"
+                         data-duration="5.25">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-05-13_07-57-31-PM">
+            <div class="card-header">
+                <h3>May 13, 2026 at 07:57 PM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-05-13_07-57-31-PM" controls>
+                        <source src="audio/2026-05-13_07-57-31-PM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-05-13_07-57-31-PM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-05-13_07-57-31-PM"
+                         data-duration="12.27">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-05-08_05-40-37-PM">
+            <div class="card-header">
+                <h3>May 08, 2026 at 05:40 PM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-05-08_05-40-37-PM" controls>
+                        <source src="audio/2026-05-08_05-40-37-PM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-05-08_05-40-37-PM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-05-08_05-40-37-PM"
+                         data-duration="5.01">
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-card" data-file-base="2026-05-08_05-21-14-PM">
+            <div class="card-header">
+                <h3>May 08, 2026 at 05:21 PM</h3>
+                
+            </div>
+            
+            <div class="media-container">
+                <div class="audio-section">
+                    <audio id="audio-2026-05-08_05-21-14-PM" controls>
+                        <source src="audio/2026-05-08_05-21-14-PM.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                
+                <div class="analysis-section">
+                    <img src="analysis/2026-05-08_05-21-14-PM_bass_analysis.png" 
+                         alt="Frequency analysis" 
+                         class="analysis-image clickable-graph"
+                         data-audio-id="audio-2026-05-08_05-21-14-PM"
+                         data-duration="6.89">
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <script>
+        function jumpToTime(audioId, time) {
+            const audioElement = document.getElementById(audioId);
+            
+            if (audioElement) {
+                audioElement.currentTime = time;
+                audioElement.play();
+            } else {
+                console.error('Audio element not found:', audioId);
+            }
+        }
+        
+        function toggleBirdseyePanel() {
+            document.getElementById('birdseyePanel').classList.toggle('active');
+        }
+        
+        function closeBirdseyePanel() {
+            document.getElementById('birdseyePanel').classList.remove('active');
+        }
+        
+        
+        
+        // Timeline data embedded at build time (works when opened locally or hosted)
+        const TIMELINE_DATA = [{"date": "2026-03-18", "time": "00:14", "description": "Signal Called and asked neighbor to turn down", "type": "complaint", "is_manual": true}, {"date": "2026-04-20", "time": "22:00", "description": "Signal Called and asked neighbor to turn down", "type": "complaint", "is_manual": true}, {"date": "2026-05-08", "time": "17:21", "file": "2026-05-08_05-21-14-PM", "bass_events": 1, "type": "recording", "is_manual": false}, {"date": "2026-05-08", "time": "17:40", "file": "2026-05-08_05-40-37-PM", "bass_events": 1, "type": "recording", "is_manual": false}, {"date": "2026-05-13", "time": "19:57", "file": "2026-05-13_07-57-31-PM", "bass_events": 1, "type": "recording", "is_manual": false}, {"date": "2026-05-13", "time": "19:58", "file": "2026-05-13_07-58-53-PM", "bass_events": 1, "type": "recording", "is_manual": false}, {"date": "2026-05-13", "time": "19:59", "file": "2026-05-13_07-59-41-PM", "bass_events": 1, "type": "recording", "is_manual": false}, {"date": "2026-05-19", "time": "16:08", "file": "2026-05-19_04-08-58-PM", "bass_events": 1, "type": "recording", "is_manual": false}, {"date": "2026-05-19", "time": "16:09", "file": "2026-05-19_04-09-21-PM", "bass_events": 3, "type": "recording", "is_manual": false}, {"date": "2026-07-04", "time": "15:03", "file": "2026-07-04_03-03-52-PM", "bass_events": 3, "type": "recording", "is_manual": false}, {"date": "2026-07-04", "time": "15:05", "file": "2026-07-04_03-05-51-PM", "bass_events": 1, "type": "recording", "is_manual": false}, {"date": "2026-07-05", "time": "20:58", "file": "2026-07-05_08-58-00-PM", "bass_events": 1, "type": "recording", "is_manual": false}, {"date": "2026-07-07", "time": "18:18", "file": "2026-07-07_06-18-46-PM", "bass_events": 6, "type": "recording", "is_manual": false}, {"date": "2026-07-07", "time": "18:18", "file": "2026-07-07_06-18-46-PM_1", "bass_events": 6, "type": "recording", "is_manual": false}, {"date": "2026-07-07", "time": "18:19", "file": "2026-07-07_06-19-17-PM", "bass_events": 4, "type": "recording", "is_manual": false}, {"date": "2026-07-07", "time": "18:20", "file": "2026-07-07_06-20-02-PM", "bass_events": 1, "type": "recording", "is_manual": false}, {"date": "2026-07-07", "time": "18:21", "file": "2026-07-07_06-21-57-PM", "bass_events": 9, "type": "recording", "is_manual": false}, {"date": "2026-07-09", "time": "18:08", "file": "2026-07-09_06-08-02-PM", "bass_events": 1, "type": "recording", "is_manual": false}, {"date": "2026-07-09", "time": "18:08", "file": "2026-07-09_06-08-17-PM", "bass_events": 3, "type": "recording", "is_manual": false}, {"date": "2026-07-09", "time": "18:24", "file": "2026-07-09_06-24-00-PM", "bass_events": 3, "type": "recording", "is_manual": false}, {"date": "2026-07-09", "time": "18:24", "file": "2026-07-09_06-24-19-PM", "bass_events": 4, "type": "recording", "is_manual": false}, {"date": "2026-07-09", "time": "18:25", "file": "2026-07-09_06-25-17-PM", "bass_events": 5, "type": "recording", "is_manual": false}, {"date": "2026-07-09", "time": "18:25", "file": "2026-07-09_06-25-46-PM", "bass_events": 2, "type": "recording", "is_manual": false}, {"date": "2026-07-14", "time": "02:57", "file": "2026-07-14_02-57-56-AM", "bass_events": 1, "type": "recording", "is_manual": false}, {"date": "2026-07-14", "time": "02:58", "file": "2026-07-14_02-58-38-AM", "bass_events": 1, "type": "recording", "is_manual": false}, {"date": "2026-07-14", "time": "02:58", "file": "2026-07-14_02-58-38-AM_1", "bass_events": 1, "type": "recording", "is_manual": false}, {"date": "2026-07-15", "time": "01:59", "file": "2026-07-15_01-59-43-AM", "bass_events": 2, "type": "recording", "is_manual": false}, {"date": "2026-07-15", "time": "01:59", "file": "2026-07-15_01-59-57-AM", "bass_events": 1, "type": "recording", "is_manual": false}, {"date": "2026-07-15", "time": "02:00", "file": "2026-07-15_02-00-03-AM", "bass_events": 7, "type": "recording", "is_manual": false}, {"date": "2026-07-17", "time": "01:01", "file": "2026-07-17_01-01-52-AM", "bass_events": 1, "type": "recording", "is_manual": false}, {"date": "2026-07-28", "time": "13:58", "file": "2026-07-28_01-58-03-PM", "bass_events": 3, "type": "recording", "is_manual": false}, {"date": "2026-07-28", "time": "16:00", "description": "Regan from Leasing Office walked the hall to confirm", "type": "verification", "is_manual": true}, {"date": "2026-07-29", "time": "01:37", "file": "2026-07-29_01-37-09-AM", "bass_events": 3, "type": "recording", "is_manual": false}, {"date": "2026-07-30", "time": "02:49", "file": "2026-07-30_02-49-47-AM", "bass_events": 1, "type": "recording", "is_manual": false}, {"date": "2026-07-30", "time": "03:00", "description": "Signal Called to turn down", "type": "complaint", "is_manual": true}];
+        
+        function initTimelineChart() {
+            createTimelineChart(TIMELINE_DATA);
+        }
+        
+        // Timeline Chart
+        document.addEventListener('DOMContentLoaded', function() {
+            initTimelineChart();
+            window.addEventListener('resize', initTimelineChart);
+            
+            // Add click event listeners to all frequency analysis graphs
+            const graphs = document.querySelectorAll('.clickable-graph');
+            
+            graphs.forEach(graph => {
+                graph.addEventListener('click', function(e) {
+                    const audioId = this.getAttribute('data-audio-id');
+                    const duration = parseFloat(this.getAttribute('data-duration'));
+                    
+                    const rect = this.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const percentage = x / rect.width;
+                    const time = percentage * duration;
+                    
+                    jumpToTime(audioId, time);
+                    
+                    this.style.transform = 'scale(0.98)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 100);
+                });
+            });
+        });
+        
+        function escapeHtml(text) {
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+        
+        function formatTimelineTime(time) {
+            const [hours, minutes] = time.split(':').map(Number);
+            const period = hours >= 12 ? 'PM' : 'AM';
+            const hour12 = hours % 12 || 12;
+            return hour12 + ':' + String(minutes).padStart(2, '0') + ' ' + period;
+        }
+        
+        function renderManualNotes(manualEvents) {
+            const notesContainer = document.getElementById('timelineManualNotes');
+            if (!notesContainer) return;
+            
+            if (!manualEvents.length) {
+                notesContainer.style.display = 'none';
+                return;
+            }
+            
+            notesContainer.style.display = 'block';
+            let notesHtml = '<h4>Verified Events Notes</h4><ul>';
+            manualEvents.forEach(event => {
+                notesHtml += '<li><span class="note-date">' + escapeHtml(event.date) + ' at ' + formatTimelineTime(event.time) + '</span>';
+                if (event.description) {
+                    notesHtml += ' — ' + escapeHtml(event.description);
+                }
+                notesHtml += '</li>';
+            });
+            notesHtml += '</ul>';
+            notesContainer.innerHTML = notesHtml;
+        }
+        
+        function createTimelineChart(events) {
+            const container = document.getElementById('timelineChart');
+            if (!events || events.length === 0) {
+                container.innerHTML = '<p style="color:#666;padding:20px;">No timeline events found.</p>';
+                renderManualNotes([]);
+                return;
+            }
+            
+            const manualEvents = events.filter(e => e.is_manual);
+            renderManualNotes(manualEvents);
+            
+            // Get unique dates and sort them
+            const uniqueDates = [...new Set(events.map(e => e.date))].sort();
+            
+            // Calculate dimensions (fallback width for local file viewing before layout)
+            const width = container.offsetWidth || container.parentElement.offsetWidth || 800;
+            const height = 360;
+            const pad = { top: 20, right: 60, bottom: 52, left: 60 };
+            const chartWidth = Math.max(width - pad.left - pad.right, 100);
+            const chartHeight = height - pad.top - pad.bottom;
+            const xAxisY = pad.top + chartHeight;
+            const dateStep = uniqueDates.length > 1 ? chartWidth / (uniqueDates.length - 1) : 0;
+            
+            // Create SVG
+            let svg = '<svg width="' + width + '" height="' + height + '" viewBox="0 0 ' + width + ' ' + height + '">';
+            
+            svg += '<defs>';
+            svg += '<pattern id="quietHoursPattern" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">';
+            svg += '<rect width="8" height="8" fill="#eef2ff"/>';
+            svg += '<line x1="0" y1="0" x2="0" y2="8" stroke="#818cf8" stroke-width="3"/>';
+            svg += '</pattern>';
+            svg += '</defs>';
+            
+            // Time increases from 12 AM at the top to 12 AM at the bottom.
+            // Shaded bands show quiet hours: midnight-7 AM and 10 PM-midnight.
+            const quietTopHeight = chartHeight * 7 / 24;
+            const quietBottomHeight = chartHeight * 2 / 24;
+            svg += '<rect x="' + pad.left + '" y="' + pad.top + '" width="' + chartWidth + '" height="' + quietTopHeight + '" fill="url(#quietHoursPattern)" stroke="#818cf8" stroke-width="1"/>';
+            svg += '<rect x="' + pad.left + '" y="' + (pad.top + chartHeight * 22 / 24) + '" width="' + chartWidth + '" height="' + quietBottomHeight + '" fill="url(#quietHoursPattern)" stroke="#818cf8" stroke-width="1"/>';
+            
+            // Draw grid lines and time labels
+            for (let i = 0; i <= 24; i += 2) {
+                const y = pad.top + chartHeight * i / 24;
+                svg += '<line x1="' + pad.left + '" y1="' + y + '" x2="' + (width - pad.right) + '" y2="' + y + '" stroke="#ddd" stroke-width="1"/>';
+                
+                let timeLabel = i;
+                if (i === 0) timeLabel = '12 AM';
+                else if (i === 12) timeLabel = '12 PM';
+                else if (i < 12) timeLabel = i + ' AM';
+                else timeLabel = (i - 12) + ' PM';
+                
+                svg += '<text x="' + (pad.left - 10) + '" y="' + (y + 4) + '" text-anchor="end" font-size="10" fill="#666">' + timeLabel + '</text>';
+            }
+            
+            // Draw events
+            let manualLabelIndex = 0;
+            events.forEach((event) => {
+                const [hours, minutes] = event.time.split(':').map(Number);
+                const timeValue = hours + minutes / 60;
+                
+                const x = pad.left + dateStep * uniqueDates.indexOf(event.date);
+                const y = pad.top + chartHeight * timeValue / 24;
+                
+                let color = '#007bff';
+                let radius = 6;
+                
+                if (event.is_manual) {
+                    color = '#e67e22';
+                    radius = 8;
+                }
+                
+                const clickHandler = event.file ? 'onclick="scrollToRecording(\'' + event.file + '\')"' : '';
+                const title = event.description ? ' title="' + escapeHtml(event.description) + '"' : '';
+                svg += '<circle cx="' + x + '" cy="' + y + '" r="' + radius + '" fill="' + color + '" ' + clickHandler + title + ' style="cursor: pointer"/>';
+                
+                if (event.is_manual && event.description) {
+                    const labelOffset = manualLabelIndex % 2 === 0 ? -10 : 14;
+                    manualLabelIndex += 1;
+                    const labelY = y + labelOffset;
+                    const labelX = x + 12;
+                    svg += '<line x1="' + x + '" y1="' + y + '" x2="' + labelX + '" y2="' + labelY + '" stroke="#e67e22" stroke-width="1"/>';
+                    svg += '<text x="' + labelX + '" y="' + labelY + '" font-size="9" fill="#8a4b08">';
+                    svg += '<tspan x="' + labelX + '" dy="0">' + escapeHtml(event.date) + '</tspan>';
+                    svg += '<tspan x="' + labelX + '" dy="11">' + escapeHtml(formatTimelineTime(event.time)) + '</tspan>';
+                    svg += '</text>';
+                }
+            });
+            
+            // Draw axes
+            svg += '<line x1="' + pad.left + '" y1="' + pad.top + '" x2="' + pad.left + '" y2="' + xAxisY + '" stroke="#333" stroke-width="2"/>';
+            svg += '<line x1="' + pad.left + '" y1="' + xAxisY + '" x2="' + (width - pad.right) + '" y2="' + xAxisY + '" stroke="#333" stroke-width="2"/>';
+            
+            // Draw date labels below x-axis, then axis title below dates
+            uniqueDates.forEach((date, i) => {
+                const x = pad.left + dateStep * i;
+                svg += '<text x="' + x + '" y="' + (xAxisY + 16) + '" text-anchor="middle" font-size="10" fill="#666">' + date + '</text>';
+            });
+            svg += '<text x="' + (width / 2) + '" y="' + (height - 8) + '" text-anchor="middle" font-size="12" fill="#333">Date</text>';
+            svg += '<text x="15" y="' + (pad.top + chartHeight / 2) + '" text-anchor="middle" font-size="12" fill="#333" transform="rotate(-90, 15, ' + (pad.top + chartHeight / 2) + ')">Time</text>';
+            
+            svg += '</svg>';
+            container.innerHTML = svg;
+        }
+        
+        function scrollToRecording(fileBase) {
+            const recordingCard = document.querySelector('[data-file-base="' + fileBase + '"]');
+            if (recordingCard) {
+                recordingCard.scrollIntoView({ behavior: 'smooth' });
+                recordingCard.style.boxShadow = '0 0 20px rgba(0, 123, 255, 0.5)';
+                setTimeout(() => {
+                    recordingCard.style.boxShadow = '';
+                }, 2000);
+            }
+        }
+    </script>
+</body>
+</html>
+    
